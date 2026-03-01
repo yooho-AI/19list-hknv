@@ -14,7 +14,7 @@ interface Props {
   onContinue: () => void
 }
 
-export default function CoverPage({ hasSave }: Props) {
+export default function CoverPage({ hasSave, onNewGame, onContinue }: Props) {
   return (
     <div className="cover">
       <img
@@ -35,11 +35,11 @@ export default function CoverPage({ hasSave }: Props) {
         {COVER.subtitle && <div className="cover-sub">{COVER.subtitle}</div>}
         {COVER.slogan && <div className="cover-slogan">{COVER.slogan}</div>}
         <div className="cover-actions">
-          <button className="cover-start" onClick={() => window.open('https://yooho.ai/login', '_blank')}>
+          <button className="cover-start" onClick={onNewGame}>
             开始游戏
           </button>
           {hasSave && (
-            <button className="cover-continue" onClick={() => window.open('https://yooho.ai/login', '_blank')}>
+            <button className="cover-continue" onClick={onContinue}>
               继续游戏
             </button>
           )}
