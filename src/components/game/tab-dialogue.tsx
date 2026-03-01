@@ -1,0 +1,342 @@
+/**
+ * [INPUT]: store.ts (messages/isTyping/streamingContent/sendMessage/inventory/useItem), parser.ts, data.ts
+ * [OUTPUT]: TabDialogue — chat area + rich message routing + quick actions + input + backpack
+ * [POS]: 对话 Tab，NPC头像气泡 + 场景卡 + 月变卡 + 快捷操作 + 道具栏 + 输入框
+ * [PROTOCOL]: Update this header on change, then check CLAUDE.md
+ */
+
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useGameStore, QUICK_ACTIONS, ITEMS, SCENES, STORY_INFO } from '../../lib/store'
+import type { Message } from '../../lib/store'
+import { parseStoryParagraph } from '../../lib/parser'
+
+const P = 'hk'
+
+// ── LetterCard ────────────────────────────────────────
+
+function LetterCard() {
+  return (
+    <div className={`${P}-letter-card`}>
+      <div className={`${P}-letter-card-title`}>🏙️ {STORY_INFO.title}</div>
+      <p>{STORY_INFO.description}</p>
+      <div style={{
+        marginTop: 16, padding: '14px 16px',
+        background: 'rgba(232,168,124,0.06)', borderRadius: 12,
+        textAlign: 'left', lineHeight: 1.8,
+      }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--primary)', marginBottom: 8 }}>📋 怎么玩</div>
+        <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
+          🔹 <b>输入文字</b>或点击<b>快捷操作</b>推进剧情<br />
+          🔹 在<b>「场景」Tab</b>切换地点，探索香港<br />
+          🔹 在<b>「人物」Tab</b>查看角色关系和属性变化<br />
+          🔹 经营<b>六项属性</b>，在十年中找到你的人生方向<br />
+          🔹 注意<b>情感健康</b>——香港速度压力不小
+        </p>
+      </div>
+      <p style={{ marginTop: 10, fontSize: 11, color: 'var(--text-muted)' }}>
+        {STORY_INFO.era} · 共120月 · 8种结局
+      </p>
+    </div>
+  )
+}
+
+// ── SceneTransitionCard ───────────────────────────────
+
+function SceneTransitionCard({ msg }: { msg: Message }) {
+  const scene = msg.sceneId ? SCENES[msg.sceneId] : null
+  if (!scene) return null
+
+  return (
+    <motion.div
+      className={`${P}-scene-card`}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
+    >
+      <div className={`${P}-scene-card-bg`}>
+        <motion.img
+          src={scene.background} alt={scene.name}
+          animate={{ scale: [1, 1.05] }}
+          transition={{ duration: 8, ease: 'linear' }}
+        />
+        <div className={`${P}-scene-card-mask`} />
+      </div>
+      <div className={`${P}-scene-card-content`}>
+        <span className={`${P}-scene-card-badge`}>📍 当前</span>
+        <div className={`${P}-scene-card-name`}>{scene.icon} {scene.name}</div>
+        <div className={`${P}-scene-card-desc`}>{scene.atmosphere}</div>
+      </div>
+    </motion.div>
+  )
+}
+
+// ── MonthChangeCard ───────────────────────────────────
+
+function MonthChangeCard({ msg }: { msg: Message }) {
+  if (!msg.monthInfo) return null
+
+  const label = `第${msg.monthInfo.month}月`
+
+  return (
+    <motion.div
+      className={`${P}-month-card`}
+      initial={{ opacity: 0, y: -30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: 'spring', damping: 18, stiffness: 200 }}
+    >
+      <div className={`${P}-month-card-accent`} />
+      <div className={`${P}-month-card-body`}>
+        <div className={`${P}-month-card-year`}>第{msg.monthInfo.year}年</div>
+        <div className={`${P}-month-card-number`}>
+          {label.split('').map((ch, i) => (
+            <span
+              key={i}
+              className={`${P}-month-type-char`}
+              style={{ animationDelay: `${i * 0.08}s` }}
+            >{ch}</span>
+          ))}
+        </div>
+        <div className={`${P}-month-card-chapter`}>
+          {msg.monthInfo.chapter}
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+// ── MessageBubble ─────────────────────────────────────
+
+function MessageBubble({ msg }: { msg: Message }) {
+  const { characters } = useGameStore()
+
+  // Rich message routing
+  if (msg.type === 'scene-transition') return <SceneTransitionCard msg={msg} />
+  if (msg.type === 'month-change') return <MonthChangeCard msg={msg} />
+
+  if (msg.role === 'system') {
+    return (
+      <motion.div
+        className={`${P}-bubble-system`}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        {msg.content}
+      </motion.div>
+    )
+  }
+
+  if (msg.role === 'user') {
+    return (
+      <motion.div
+        className={`${P}-bubble-player`}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        {msg.content}
+      </motion.div>
+    )
+  }
+
+  // assistant — NPC avatar row + colored border
+  const { narrative, statHtml, charColor } = parseStoryParagraph(msg.content)
+  const char = msg.character ? characters[msg.character] : null
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      {char && (
+        <div className={`${P}-avatar-row`}>
+          <img className={`${P}-npc-avatar`} src={char.portrait} alt={char.name} loading="lazy" />
+          <span className={`${P}-npc-name`} style={{ color: char.themeColor }}>{char.name}</span>
+        </div>
+      )}
+      <div
+        className={`${P}-bubble-npc`}
+        style={charColor ? { borderLeftColor: charColor } : undefined}
+      >
+        <div className={`${P}-story-paragraph`} dangerouslySetInnerHTML={{ __html: narrative }} />
+        {statHtml && <div dangerouslySetInnerHTML={{ __html: statHtml }} />}
+      </div>
+    </motion.div>
+  )
+}
+
+// ── StreamingBubble ───────────────────────────────────
+
+function StreamingBubble({ content }: { content: string }) {
+  const { narrative, statHtml, charColor } = parseStoryParagraph(content)
+  return (
+    <div className={`${P}-bubble-npc`} style={charColor ? { borderLeftColor: charColor } : undefined}>
+      <div className={`${P}-story-paragraph`} dangerouslySetInnerHTML={{ __html: narrative }} />
+      {statHtml && <div dangerouslySetInnerHTML={{ __html: statHtml }} />}
+    </div>
+  )
+}
+
+// ── TypingIndicator ───────────────────────────────────
+
+function TypingIndicator() {
+  return (
+    <div className={`${P}-typing`}>
+      <div className={`${P}-typing-dot`} />
+      <div className={`${P}-typing-dot`} />
+      <div className={`${P}-typing-dot`} />
+    </div>
+  )
+}
+
+// ── InventorySheet ────────────────────────────────────
+
+function InventorySheet({ onClose }: { onClose: () => void }) {
+  const { inventory, useItem } = useGameStore()
+  const items = Object.entries(inventory).filter(([, count]) => count > 0)
+
+  return (
+    <motion.div
+      className={`${P}-overlay`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <motion.div
+        className={`${P}-modal`}
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        onClick={(e) => e.stopPropagation()}
+        style={{ position: 'absolute', bottom: 0, left: 0, right: 0, borderRadius: '16px 16px 0 0', maxHeight: '60vh', overflowY: 'auto' }}
+      >
+        <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--primary)', textAlign: 'center', marginBottom: 16 }}>
+          🎒 背包
+        </h3>
+        {items.length === 0 && (
+          <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, padding: 20 }}>
+            背包里空空如也
+          </div>
+        )}
+        {items.map(([id]) => {
+          const item = ITEMS[id]
+          if (!item) return null
+          return (
+            <div
+              key={id}
+              className={`${P}-bag-item`}
+              onClick={() => { useItem(id); onClose() }}
+            >
+              <span style={{ fontSize: 20 }}>{item.icon}</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 600 }}>{item.name}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{item.description}</div>
+              </div>
+            </div>
+          )
+        })}
+      </motion.div>
+    </motion.div>
+  )
+}
+
+// ── TabDialogue ───────────────────────────────────────
+
+export function TabDialogue() {
+  const { messages, isTyping, streamingContent, sendMessage, inventory } = useGameStore()
+  const [input, setInput] = useState('')
+  const [showInventory, setShowInventory] = useState(false)
+  const chatRef = useRef<HTMLDivElement>(null)
+
+  const itemCount = Object.values(inventory).filter((n) => n > 0).length
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight
+    }
+  }, [messages, streamingContent])
+
+  const handleSend = useCallback(() => {
+    const text = input.trim()
+    if (!text || isTyping) return
+    setInput('')
+    sendMessage(text)
+  }, [input, isTyping, sendMessage])
+
+  const handleQuick = useCallback((action: string) => {
+    if (isTyping) return
+    sendMessage(action)
+  }, [isTyping, sendMessage])
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {/* Chat Area */}
+      <div ref={chatRef} className={`${P}-chat-area ${P}-scrollbar`}>
+        {messages.length === 0 && <LetterCard />}
+        {messages.map((msg) => (
+          <MessageBubble key={msg.id} msg={msg} />
+        ))}
+        {isTyping && streamingContent && <StreamingBubble content={streamingContent} />}
+        {isTyping && !streamingContent && <TypingIndicator />}
+      </div>
+
+      {/* Quick Actions */}
+      <div className={`${P}-quick-grid`}>
+        {QUICK_ACTIONS.map((action) => (
+          <button
+            key={action}
+            className={`${P}-quick-btn`}
+            onClick={() => handleQuick(action)}
+            disabled={isTyping}
+          >
+            {action}
+          </button>
+        ))}
+      </div>
+
+      {/* Input Area */}
+      <div className={`${P}-input-area`}>
+        <button
+          className={`${P}-icon-btn`}
+          onClick={() => setShowInventory(true)}
+          style={{ position: 'relative' }}
+        >
+          🎒
+          {itemCount > 0 && (
+            <span style={{
+              position: 'absolute', top: 0, right: 0,
+              background: 'var(--primary)', color: 'var(--bg-primary)',
+              fontSize: 10, fontWeight: 700, borderRadius: '50%',
+              width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {itemCount}
+            </span>
+          )}
+        </button>
+        <input
+          type="text"
+          className={`${P}-input`}
+          placeholder="输入你的行动..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+          disabled={isTyping}
+        />
+        <button
+          className={`${P}-send-btn`}
+          onClick={handleSend}
+          disabled={isTyping || !input.trim()}
+        >
+          ▶
+        </button>
+      </div>
+
+      {/* Inventory Sheet */}
+      <AnimatePresence>
+        {showInventory && <InventorySheet onClose={() => setShowInventory(false)} />}
+      </AnimatePresence>
+    </div>
+  )
+}

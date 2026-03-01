@@ -1,0 +1,767 @@
+/* ── Scene Transition Card ── */
+
+.hk-scene-card {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.hk-scene-card-bg {
+  position: absolute;
+  inset: 0;
+}
+
+.hk-scene-card-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: hkKenBurns 8s linear infinite alternate;
+}
+
+@keyframes hkKenBurns {
+  from { transform: scale(1); }
+  to { transform: scale(1.05); }
+}
+
+.hk-scene-card-mask {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent 30%, rgba(0, 0, 0, 0.85));
+}
+
+.hk-scene-card-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+}
+
+.hk-scene-card-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--primary);
+  color: var(--bg-primary);
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 2px;
+  margin-bottom: 6px;
+}
+
+.hk-scene-card-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.hk-scene-card-desc {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ── Month Change Card ── */
+
+.hk-month-card {
+  width: 80%;
+  max-width: 240px;
+  margin: 16px auto;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(232, 168, 124, 0.12) 0%, transparent 50%),
+    linear-gradient(170deg, #2a2540, #1e1a30, #1a1528);
+  border: 1px solid rgba(232, 168, 124, 0.2);
+  border-radius: 8px;
+  overflow: hidden;
+  text-align: center;
+}
+
+.hk-month-card-accent {
+  height: 3px;
+  background: linear-gradient(90deg, var(--neon-gold), var(--neon-pink), var(--neon-gold));
+}
+
+.hk-month-card-body {
+  padding: 16px 12px;
+}
+
+.hk-month-card-year {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+
+.hk-month-card-number {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: 4px;
+  text-shadow: 0 0 12px rgba(var(--primary-rgb), 0.3);
+}
+
+.hk-month-card-chapter {
+  font-size: 11px;
+  color: var(--neon-pink);
+  font-weight: 600;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
+/* Typewriter animation for month card */
+.hk-month-type-char {
+  display: inline-block;
+  opacity: 0;
+  animation: hkMonthTypeIn 0.08s forwards;
+}
+
+@keyframes hkMonthTypeIn {
+  to { opacity: 1; }
+}
+
+/* ── NPC Avatar Row ── */
+
+.hk-avatar-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.hk-npc-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1.5px solid var(--primary);
+}
+
+.hk-npc-name {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+/* ── Dashboard Drawer (Left) ── */
+
+.hk-dash-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.hk-dash-drawer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 85vw;
+  max-width: 380px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(232, 168, 124, 0.05) 0%, transparent 50%),
+    var(--bg-primary);
+  border-right: 1px solid rgba(var(--primary-rgb), 0.2);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.6);
+  overflow-y: auto;
+  padding: 20px 16px;
+  padding-top: calc(20px + env(safe-area-inset-top));
+}
+
+.hk-dash-close {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top));
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--primary-rgb), 0.2);
+  background: rgba(var(--primary-rgb), 0.05);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* Drag handle */
+.hk-dash-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  color: var(--text-muted);
+  cursor: grab;
+  font-size: 14px;
+  user-select: none;
+}
+
+/* Dashboard sections */
+.hk-dash-section {
+  margin-top: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px dashed rgba(var(--primary-rgb), 0.12);
+}
+
+.hk-dash-section:last-child {
+  border-bottom: none;
+}
+
+.hk-dash-section-title {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 4px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+/* Front page */
+.hk-dash-front {
+  text-align: center;
+  padding: 16px 0;
+}
+
+.hk-dash-front-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 4px;
+  margin-bottom: 8px;
+}
+
+.hk-dash-front-info {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+/* Character carousel */
+.hk-dash-char-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 4px 0;
+  scrollbar-width: none;
+}
+
+.hk-dash-char-scroll::-webkit-scrollbar { display: none; }
+
+.hk-dash-char-card {
+  flex-shrink: 0;
+  width: 100px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(var(--primary-rgb), 0.15);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.hk-dash-char-card:active {
+  border-color: rgba(var(--primary-rgb), 0.4);
+  transform: scale(0.97);
+}
+
+.hk-dash-char-card img {
+  width: 100%;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.hk-dash-char-card-info {
+  padding: 6px 8px;
+  background: rgba(var(--primary-rgb), 0.05);
+}
+
+.hk-dash-char-card-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.hk-dash-char-card-stat {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* Scene grid */
+.hk-dash-scene-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.hk-dash-scene-thumb {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  border: 1px solid rgba(var(--primary-rgb), 0.1);
+}
+
+.hk-dash-scene-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hk-dash-scene-thumb-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 2px 4px;
+  background: rgba(0, 0, 0, 0.7);
+  font-size: 9px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.hk-dash-scene-locked {
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+
+/* Objectives */
+.hk-dash-objective {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.hk-dash-objective-check {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid rgba(var(--primary-rgb), 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 10px;
+}
+
+/* Finance overview */
+.hk-dash-finance {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.hk-dash-finance-item {
+  padding: 10px;
+  background: rgba(var(--primary-rgb), 0.04);
+  border: 1px solid rgba(var(--primary-rgb), 0.1);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.hk-dash-finance-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.hk-dash-finance-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* ── Record Sheet (Right) ── */
+
+.hk-record-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.hk-record-sheet {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 85%;
+  max-width: 360px;
+  background: var(--bg-primary);
+  border-left: 1px solid var(--border);
+  padding: 20px 16px;
+  padding-top: calc(20px + env(safe-area-inset-top));
+  overflow-y: auto;
+  z-index: 160;
+}
+
+.hk-record-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary);
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+
+.hk-record-close {
+  position: absolute;
+  top: calc(12px + env(safe-area-inset-top));
+  left: 12px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--primary-rgb), 0.2);
+  background: rgba(var(--primary-rgb), 0.05);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* Timeline */
+.hk-record-timeline {
+  position: relative;
+  padding-left: 20px;
+}
+
+.hk-record-timeline::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+
+.hk-record-item {
+  position: relative;
+  padding: 8px 0 16px;
+}
+
+.hk-record-dot {
+  position: absolute;
+  left: -20px;
+  top: 12px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: 2px solid var(--bg-primary);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.hk-record-meta {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 3px;
+}
+
+.hk-record-event-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.hk-record-event-content {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ── Character Dossier ── */
+
+.hk-dossier-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  background: var(--bg-primary);
+  overflow-y: auto;
+}
+
+.hk-dossier-close {
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top));
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--primary-rgb), 0.3);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  z-index: 121;
+}
+
+.hk-dossier-portrait {
+  position: relative;
+  width: 100%;
+  height: 50vh;
+  overflow: hidden;
+}
+
+.hk-dossier-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  animation: hkBreathe 4s ease-in-out infinite;
+}
+
+.hk-dossier-portrait-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: linear-gradient(transparent, var(--bg-primary));
+}
+
+.hk-dossier-info {
+  padding: 0 20px 40px;
+  margin-top: -40px;
+  position: relative;
+  z-index: 1;
+}
+
+.hk-dossier-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.hk-dossier-title-text {
+  font-size: 13px;
+  color: var(--primary);
+  margin-bottom: 12px;
+}
+
+.hk-dossier-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.hk-dossier-tag {
+  padding: 3px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(var(--primary-rgb), 0.2);
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: rgba(var(--primary-rgb), 0.04);
+}
+
+.hk-dossier-section {
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+
+.hk-dossier-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.hk-dossier-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.hk-dossier-expandable {
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.hk-dossier-expandable-hidden {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.3s;
+}
+
+.hk-dossier-expandable-show {
+  max-height: 300px;
+  opacity: 1;
+}
+
+/* ── Relation Graph ── */
+
+.hk-relation-graph {
+  margin: 16px 0;
+}
+
+.hk-relation-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(var(--primary-rgb), 0.04);
+  border: 1px solid rgba(var(--primary-rgb), 0.08);
+  border-radius: 10px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.hk-relation-card:active {
+  background: rgba(var(--primary-rgb), 0.1);
+}
+
+.hk-relation-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(var(--primary-rgb), 0.3);
+}
+
+.hk-relation-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.hk-relation-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.hk-relation-value {
+  margin-left: auto;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* ── Backpack Popover ── */
+
+.hk-bag-popover {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 8px;
+  width: 200px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: var(--shadow-card-hover);
+  z-index: 50;
+}
+
+.hk-bag-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.hk-bag-item:active {
+  color: var(--primary);
+}
+
+.hk-bag-item-count {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ── Music Player ── */
+
+.hk-music-toggle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--primary-rgb), 0.2);
+  background: transparent;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.hk-music-playing {
+  color: var(--primary);
+  border-color: rgba(var(--primary-rgb), 0.4);
+  animation: hkMusicPulse 2s ease-in-out infinite;
+}
+
+@keyframes hkMusicPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.2); }
+  50% { box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0); }
+}
+
+/* ── Letter Card (initial intro) ── */
+
+.hk-letter-card {
+  margin: 8px 16px 16px;
+  padding: 20px;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(232, 168, 124, 0.06) 0%, transparent 50%),
+    rgba(26, 26, 46, 0.8);
+  border: 1px solid rgba(var(--primary-rgb), 0.15);
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 2;
+  color: var(--text-secondary);
+}
+
+.hk-letter-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+}
+
+/* ── Typing indicator ── */
+
+.hk-typing {
+  display: flex;
+  gap: 4px;
+  padding: 12px 16px;
+  align-self: flex-start;
+}
+
+.hk-typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: hkTypingBounce 1.4s ease-in-out infinite;
+}
+
+.hk-typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.hk-typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes hkTypingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}

@@ -1,0 +1,318 @@
+/* ── 港式电影片头开场 ── */
+
+.hk-start {
+  position: fixed;
+  inset: 0;
+  background: #0a0a0a;
+  overflow: hidden;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Phase 1: 城市剪影 + 金字打字机 ── */
+
+.hk-cinema-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse at 50% 80%, rgba(232, 168, 124, 0.08) 0%, transparent 60%),
+    linear-gradient(180deg, #0a0a0a 0%, #1a1520 50%, #0a0a0a 100%);
+}
+
+/* 城市天际线剪影 */
+.hk-skyline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 35vh;
+  background:
+    linear-gradient(transparent 0%, rgba(232, 168, 124, 0.03) 100%);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 200'%3E%3Cpath d='M0,200 L0,160 L30,160 L30,100 L50,100 L50,80 L55,80 L55,40 L60,40 L60,80 L65,80 L65,100 L80,100 L80,130 L100,130 L100,90 L110,90 L110,60 L115,20 L120,60 L130,60 L130,90 L150,90 L150,110 L170,110 L170,70 L180,70 L180,50 L185,50 L185,70 L200,70 L200,100 L220,100 L220,140 L250,140 L250,80 L260,80 L260,45 L265,45 L265,80 L280,80 L280,120 L300,120 L300,90 L320,90 L320,55 L325,30 L330,55 L340,55 L340,90 L360,90 L360,130 L380,130 L380,100 L400,100 L400,70 L410,70 L410,35 L415,35 L415,70 L430,70 L430,110 L460,110 L460,85 L480,85 L480,60 L490,60 L490,40 L495,15 L500,40 L510,40 L510,70 L530,70 L530,100 L550,100 L550,130 L580,130 L580,95 L600,95 L600,65 L610,65 L610,45 L615,45 L615,65 L630,65 L630,100 L660,100 L660,120 L690,120 L690,80 L700,80 L700,50 L705,50 L705,80 L720,80 L720,110 L750,110 L750,140 L780,140 L780,160 L800,160 L800,200 Z' fill='white'/%3E%3C/svg%3E");
+  mask-size: 100% 100%;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 200'%3E%3Cpath d='M0,200 L0,160 L30,160 L30,100 L50,100 L50,80 L55,80 L55,40 L60,40 L60,80 L65,80 L65,100 L80,100 L80,130 L100,130 L100,90 L110,90 L110,60 L115,20 L120,60 L130,60 L130,90 L150,90 L150,110 L170,110 L170,70 L180,70 L180,50 L185,50 L185,70 L200,70 L200,100 L220,100 L220,140 L250,140 L250,80 L260,80 L260,45 L265,45 L265,80 L280,80 L280,120 L300,120 L300,90 L320,90 L320,55 L325,30 L330,55 L340,55 L340,90 L360,90 L360,130 L380,130 L380,100 L400,100 L400,70 L410,70 L410,35 L415,35 L415,70 L430,70 L430,110 L460,110 L460,85 L480,85 L480,60 L490,60 L490,40 L495,15 L500,40 L510,40 L510,70 L530,70 L530,100 L550,100 L550,130 L580,130 L580,95 L600,95 L600,65 L610,65 L610,45 L615,45 L615,65 L630,65 L630,100 L660,100 L660,120 L690,120 L690,80 L700,80 L700,50 L705,50 L705,80 L720,80 L720,110 L750,110 L750,140 L780,140 L780,160 L800,160 L800,200 Z' fill='white'/%3E%3C/svg%3E");
+  -webkit-mask-size: 100% 100%;
+  opacity: 0.4;
+}
+
+/* 霓虹灯点 */
+.hk-neon-dots {
+  position: absolute;
+  bottom: 10vh;
+  left: 0;
+  right: 0;
+  height: 25vh;
+  pointer-events: none;
+}
+
+.hk-neon-dot {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  animation: hkNeonFlicker 2s ease-in-out infinite;
+}
+
+@keyframes hkNeonFlicker {
+  0%, 100% { opacity: 0.3; box-shadow: 0 0 4px currentColor; }
+  50% { opacity: 1; box-shadow: 0 0 8px currentColor, 0 0 16px currentColor; }
+}
+
+/* 标题区 */
+.hk-cinema-title {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.hk-title-main {
+  font-size: 36px;
+  font-weight: 800;
+  color: #E8A87C;
+  letter-spacing: 8px;
+  text-shadow: 0 0 20px rgba(232, 168, 124, 0.4);
+  margin-bottom: 12px;
+}
+
+.hk-title-sub {
+  font-size: 16px;
+  color: rgba(232, 168, 124, 0.6);
+  letter-spacing: 6px;
+  font-weight: 300;
+}
+
+.hk-title-divider {
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #E8A87C, transparent);
+  margin: 16px auto;
+}
+
+/* 打字机效果 */
+.hk-typewriter {
+  position: relative;
+  z-index: 2;
+  max-width: 280px;
+  text-align: center;
+  font-size: 14px;
+  color: rgba(232, 168, 124, 0.7);
+  line-height: 2;
+  letter-spacing: 1px;
+}
+
+.hk-type-char {
+  display: inline;
+  opacity: 0;
+  animation: hkTypeIn 0.1s forwards;
+}
+
+@keyframes hkTypeIn {
+  to { opacity: 1; }
+}
+
+.hk-type-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 16px;
+  background: #E8A87C;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: hkCursorBlink 0.8s step-end infinite;
+}
+
+@keyframes hkCursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ── Phase 2: 姓名输入 ── */
+
+.hk-name-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 32px;
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(232, 168, 124, 0.06) 0%, transparent 60%),
+    #0a0a0a;
+}
+
+.hk-name-label {
+  font-size: 13px;
+  color: rgba(232, 168, 124, 0.6);
+  letter-spacing: 4px;
+  margin-bottom: 20px;
+}
+
+.hk-name-input {
+  width: 100%;
+  max-width: 260px;
+  padding: 14px 0;
+  border: none;
+  border-bottom: 1px solid rgba(232, 168, 124, 0.3);
+  background: transparent;
+  color: #E8A87C;
+  font-size: 20px;
+  text-align: center;
+  letter-spacing: 4px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.hk-name-input:focus {
+  border-bottom-color: #E8A87C;
+}
+
+.hk-name-input::placeholder {
+  color: rgba(232, 168, 124, 0.25);
+  letter-spacing: 2px;
+}
+
+.hk-name-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+/* ── CTA Buttons ── */
+
+.hk-start-cta {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 40px;
+}
+
+.hk-start-btn {
+  padding: 14px 48px;
+  border: 1px solid rgba(232, 168, 124, 0.4);
+  background: rgba(232, 168, 124, 0.1);
+  color: #E8A87C;
+  font-size: 15px;
+  letter-spacing: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.hk-start-btn:active {
+  background: rgba(232, 168, 124, 0.2);
+  transform: scale(0.98);
+}
+
+.hk-start-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(232, 168, 124, 0.15), transparent);
+  animation: hkShimmer 2.5s ease-in-out infinite;
+}
+
+.hk-continue-btn {
+  padding: 10px 32px;
+  border: 1px solid rgba(232, 168, 124, 0.2);
+  background: transparent;
+  color: rgba(232, 168, 124, 0.5);
+  font-size: 12px;
+  letter-spacing: 2px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.hk-continue-btn:active {
+  color: #E8A87C;
+  border-color: rgba(232, 168, 124, 0.4);
+}
+
+/* ── Skip Button ── */
+
+.hk-skip-btn {
+  position: absolute;
+  top: calc(16px + env(safe-area-inset-top));
+  right: 16px;
+  padding: 6px 14px;
+  border: 1px solid rgba(232, 168, 124, 0.2);
+  background: rgba(0, 0, 0, 0.4);
+  color: rgba(232, 168, 124, 0.5);
+  font-size: 11px;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 10;
+  backdrop-filter: blur(4px);
+}
+
+/* ── Music Bar ── */
+
+.hk-music-bar {
+  position: absolute;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(232, 168, 124, 0.15);
+  border-radius: 20px;
+  backdrop-filter: blur(8px);
+  z-index: 2;
+}
+
+.hk-music-bar span {
+  font-size: 11px;
+  color: rgba(232, 168, 124, 0.5);
+}
+
+/* ── Cinema Film Grain ── */
+
+.hk-film-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 256px;
+}
+
+/* ── Fade transitions ── */
+
+.hk-fade-in {
+  animation: hkFadeIn 1s ease-out forwards;
+}
+
+@keyframes hkFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hk-fade-out {
+  animation: hkFadeOut 0.6s ease-in forwards;
+}
+
+@keyframes hkFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
