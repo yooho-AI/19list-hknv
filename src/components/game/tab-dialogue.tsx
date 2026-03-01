@@ -1,15 +1,16 @@
 /**
- * [INPUT]: store.ts (messages/isTyping/streamingContent/sendMessage/inventory/useItem), parser.ts, data.ts
- * [OUTPUT]: TabDialogue — chat area + rich message routing + quick actions + input + backpack
- * [POS]: 对话 Tab，NPC头像气泡 + 场景卡 + 月变卡 + 快捷操作 + 道具栏 + 输入框
+ * [INPUT]: store.ts (messages/isTyping/streamingContent/sendMessage/inventory/useItem/choices), parser.ts
+ * [OUTPUT]: TabDialogue — chat area + rich message routing + dynamic choices + input + backpack
+ * [POS]: 对话 Tab，Markdown渲染NPC全宽气泡 + 场景卡 + 月变卡 + AI动态选项 + 道具栏 + 输入框
  * [PROTOCOL]: Update this header on change, then check CLAUDE.md
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useGameStore, QUICK_ACTIONS, ITEMS, SCENES, STORY_INFO } from '../../lib/store'
+import { useGameStore, ITEMS, SCENES, STORY_INFO } from '../../lib/store'
 import type { Message } from '../../lib/store'
 import { parseStoryParagraph } from '../../lib/parser'
+import { Backpack, PaperPlaneRight, Gift } from '@phosphor-icons/react'
 
 const P = 'hk'
 
@@ -18,20 +19,20 @@ const P = 'hk'
 function LetterCard() {
   return (
     <div className={`${P}-letter-card`}>
-      <div className={`${P}-letter-card-title`}>🏙️ {STORY_INFO.title}</div>
+      <div className={`${P}-letter-card-title`}>{STORY_INFO.title}</div>
       <p>{STORY_INFO.description}</p>
       <div style={{
         marginTop: 16, padding: '14px 16px',
         background: 'rgba(232,168,124,0.06)', borderRadius: 12,
         textAlign: 'left', lineHeight: 1.8,
       }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--primary)', marginBottom: 8 }}>📋 怎么玩</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--primary)', marginBottom: 8 }}>怎么玩</div>
         <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
-          🔹 <b>输入文字</b>或点击<b>快捷操作</b>推进剧情<br />
-          🔹 在<b>「场景」Tab</b>切换地点，探索香港<br />
-          🔹 在<b>「人物」Tab</b>查看角色关系和属性变化<br />
-          🔹 经营<b>六项属性</b>，在十年中找到你的人生方向<br />
-          🔹 注意<b>情感健康</b>——香港速度压力不小
+          输入文字或点击选项推进剧情<br />
+          在「场景」Tab切换地点，探索香港<br />
+          在「人物」Tab查看角色关系和属性变化<br />
+          经营六项属性，在十年中找到你的人生方向<br />
+          注意情感健康——香港速度压力不小
         </p>
       </div>
       <p style={{ marginTop: 10, fontSize: 11, color: 'var(--text-muted)' }}>
@@ -59,12 +60,13 @@ function SceneTransitionCard({ msg }: { msg: Message }) {
           src={scene.background} alt={scene.name}
           animate={{ scale: [1, 1.05] }}
           transition={{ duration: 8, ease: 'linear' }}
+          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
         />
         <div className={`${P}-scene-card-mask`} />
       </div>
       <div className={`${P}-scene-card-content`}>
-        <span className={`${P}-scene-card-badge`}>📍 当前</span>
-        <div className={`${P}-scene-card-name`}>{scene.icon} {scene.name}</div>
+        <span className={`${P}-scene-card-badge`}>{scene.icon} 场景切换</span>
+        <div className={`${P}-scene-card-name`}>{scene.name}</div>
         <div className={`${P}-scene-card-desc`}>{scene.atmosphere}</div>
       </div>
     </motion.div>
@@ -138,7 +140,7 @@ function MessageBubble({ msg }: { msg: Message }) {
     )
   }
 
-  // assistant — NPC avatar row + colored border
+  // assistant — NPC avatar row + full-width markdown bubble
   const { narrative, statHtml, charColor } = parseStoryParagraph(msg.content)
   const char = msg.character ? characters[msg.character] : null
 
@@ -147,17 +149,26 @@ function MessageBubble({ msg }: { msg: Message }) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      {char && (
-        <div className={`${P}-avatar-row`}>
-          <img className={`${P}-npc-avatar`} src={char.portrait} alt={char.name} loading="lazy" />
+      <div className={`${P}-avatar-row`}>
+        {char && (
+          <img
+            className={`${P}-npc-avatar`}
+            src={char.portrait}
+            alt={char.name}
+            loading="lazy"
+            style={{ borderColor: char.themeColor }}
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+          />
+        )}
+        {char && (
           <span className={`${P}-npc-name`} style={{ color: char.themeColor }}>{char.name}</span>
-        </div>
-      )}
+        )}
+      </div>
       <div
         className={`${P}-bubble-npc`}
         style={charColor ? { borderLeftColor: charColor } : undefined}
       >
-        <div className={`${P}-story-paragraph`} dangerouslySetInnerHTML={{ __html: narrative }} />
+        <div dangerouslySetInnerHTML={{ __html: narrative }} />
         {statHtml && <div dangerouslySetInnerHTML={{ __html: statHtml }} />}
       </div>
     </motion.div>
@@ -170,7 +181,7 @@ function StreamingBubble({ content }: { content: string }) {
   const { narrative, statHtml, charColor } = parseStoryParagraph(content)
   return (
     <div className={`${P}-bubble-npc`} style={charColor ? { borderLeftColor: charColor } : undefined}>
-      <div className={`${P}-story-paragraph`} dangerouslySetInnerHTML={{ __html: narrative }} />
+      <div dangerouslySetInnerHTML={{ __html: narrative }} />
       {statHtml && <div dangerouslySetInnerHTML={{ __html: statHtml }} />}
     </div>
   )
@@ -212,7 +223,8 @@ function InventorySheet({ onClose }: { onClose: () => void }) {
         style={{ position: 'absolute', bottom: 0, left: 0, right: 0, borderRadius: '16px 16px 0 0', maxHeight: '60vh', overflowY: 'auto' }}
       >
         <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--primary)', textAlign: 'center', marginBottom: 16 }}>
-          🎒 背包
+          <Gift size={16} weight="fill" style={{ verticalAlign: -2, marginRight: 6 }} />
+          背包
         </h3>
         {items.length === 0 && (
           <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, padding: 20 }}>
@@ -244,19 +256,22 @@ function InventorySheet({ onClose }: { onClose: () => void }) {
 // ── TabDialogue ───────────────────────────────────────
 
 export function TabDialogue() {
-  const { messages, isTyping, streamingContent, sendMessage, inventory } = useGameStore()
+  const {
+    messages, isTyping, streamingContent,
+    sendMessage, inventory, choices,
+  } = useGameStore()
   const [input, setInput] = useState('')
   const [showInventory, setShowInventory] = useState(false)
   const chatRef = useRef<HTMLDivElement>(null)
 
-  const itemCount = Object.values(inventory).filter((n) => n > 0).length
+  const totalItems = Object.values(inventory).reduce((sum, n) => sum + n, 0)
 
   // Auto-scroll to bottom
   useEffect(() => {
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight
     }
-  }, [messages, streamingContent])
+  }, [messages, streamingContent, choices])
 
   const handleSend = useCallback(() => {
     const text = input.trim()
@@ -265,7 +280,7 @@ export function TabDialogue() {
     sendMessage(text)
   }, [input, isTyping, sendMessage])
 
-  const handleQuick = useCallback((action: string) => {
+  const handleChoice = useCallback((action: string) => {
     if (isTyping) return
     sendMessage(action)
   }, [isTyping, sendMessage])
@@ -282,19 +297,22 @@ export function TabDialogue() {
         {isTyping && !streamingContent && <TypingIndicator />}
       </div>
 
-      {/* Quick Actions */}
-      <div className={`${P}-quick-grid`}>
-        {QUICK_ACTIONS.map((action) => (
-          <button
-            key={action}
-            className={`${P}-quick-btn`}
-            onClick={() => handleQuick(action)}
-            disabled={isTyping}
-          >
-            {action}
-          </button>
-        ))}
-      </div>
+      {/* Dynamic Choices from AI (4x1 vertical) */}
+      {choices.length > 0 && (
+        <div className={`${P}-choice-list`}>
+          {choices.map((action, idx) => (
+            <button
+              key={`${action}-${idx}`}
+              className={`${P}-choice-btn`}
+              onClick={() => handleChoice(action)}
+              disabled={isTyping}
+            >
+              <span className={`${P}-choice-idx`}>{idx + 1}</span>
+              {action}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Input Area */}
       <div className={`${P}-input-area`}>
@@ -303,15 +321,15 @@ export function TabDialogue() {
           onClick={() => setShowInventory(true)}
           style={{ position: 'relative' }}
         >
-          🎒
-          {itemCount > 0 && (
+          <Backpack size={20} />
+          {totalItems > 0 && (
             <span style={{
               position: 'absolute', top: 0, right: 0,
               background: 'var(--primary)', color: 'var(--bg-primary)',
               fontSize: 10, fontWeight: 700, borderRadius: '50%',
               width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              {itemCount}
+              {totalItems}
             </span>
           )}
         </button>
@@ -329,7 +347,7 @@ export function TabDialogue() {
           onClick={handleSend}
           disabled={isTyping || !input.trim()}
         >
-          ▶
+          <PaperPlaneRight size={18} weight="fill" />
         </button>
       </div>
 

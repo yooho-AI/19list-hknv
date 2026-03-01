@@ -9,6 +9,7 @@ import GAME_SCRIPT from './script.md?raw'
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import { streamChat, chat } from './stream'
+import { extractChoices } from './parser'
 import {
   type Character, type CharacterStats, type Message, type StatMeta, type StoryRecord,
   PERIODS, MAX_MONTHS, MAX_ACTION_POINTS,
@@ -43,6 +44,7 @@ interface GameState {
   historySummary: string
   isTyping: boolean
   streamingContent: string
+  choices: string[]
   endingType: string | null
   activeTab: 'dialogue' | 'scene' | 'character'
   showDashboard: boolean
@@ -197,7 +199,8 @@ ${state.triggeredEvents.join('、') || '无'}
 - 角色对话用角色名开头标识说话者
 - 数值变化：【职业能力+5】【陈子谦 好感+10】
 - 粤语穿插程度根据玩家粤语能力(${state.globalStats.cantonese})动态调整
-- 严格遵循剧本叙事风格和信息不对称`
+- 严格遵循剧本叙事风格和信息不对称
+- 每段回复末尾必须提供4个选项（1. 2. 3. 4.），让玩家选择下一步行动`
 }
 
 // ── Store ──
@@ -224,6 +227,7 @@ export const useGameStore = create<GameStore>()(immer((set, get) => ({
   historySummary: '',
   isTyping: false,
   streamingContent: '',
+  choices: [],
   endingType: null,
   activeTab: 'dialogue',
   showDashboard: false,
@@ -297,6 +301,7 @@ export const useGameStore = create<GameStore>()(immer((set, get) => ({
       })
       s.isTyping = true
       s.streamingContent = ''
+      s.choices = []
     })
 
     try {
@@ -334,8 +339,12 @@ export const useGameStore = create<GameStore>()(immer((set, get) => ({
         () => {},
       )
 
+      // Extract dynamic choices from AI response
+      const { cleanContent, choices } = extractChoices(fullContent)
+      const contentForParse = cleanContent || fullContent
+
       // Dual-track parse
-      const { charChanges, globalChanges } = parseStatChanges(fullContent, get().characters)
+      const { charChanges, globalChanges } = parseStatChanges(contentForParse, get().characters)
 
       set((s) => {
         // Apply character stat changes
@@ -381,15 +390,16 @@ export const useGameStore = create<GameStore>()(immer((set, get) => ({
         set((s) => { s.endingType = 'be-collapse' })
       }
 
-      // Push AI message
+      // Push AI message (with choices stripped)
       set((s) => {
         s.messages.push({
-          id: makeId(), role: 'assistant', content: fullContent,
+          id: makeId(), role: 'assistant', content: contentForParse,
           character: s.currentCharacter ?? undefined,
           timestamp: Date.now(),
         })
         s.isTyping = false
         s.streamingContent = ''
+        s.choices = choices
       })
 
       get().advanceTime()

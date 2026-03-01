@@ -10,6 +10,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useGameStore, ENDINGS } from './lib/store'
 import { useBgm } from './lib/bgm'
 import { trackGameStart, trackGameContinue, trackPlayerCreate } from './lib/analytics'
+import { FloppyDisk, FolderOpen, ArrowClockwise, Play } from '@phosphor-icons/react'
 import CoverPage from '@/components/opening/CoverPage'
 import Prologue from '@/components/opening/Prologue'
 import { AppShell } from './components/game/app-shell'
@@ -220,16 +221,16 @@ function MenuOverlay({ onClose }: { onClose: () => void }) {
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <button className={`${P}-quick-btn`} onClick={() => { saveGame(); notify('已保存') }}>
-            💾 保存游戏
+            <FloppyDisk size={16} weight="fill" style={{ verticalAlign: -2, marginRight: 6 }} /> 保存游戏
           </button>
           <button className={`${P}-quick-btn`} onClick={() => { loadGame(); onClose() }}>
-            📂 读取存档
+            <FolderOpen size={16} weight="fill" style={{ verticalAlign: -2, marginRight: 6 }} /> 读取存档
           </button>
           <button className={`${P}-quick-btn`} onClick={() => { clearSave(); resetGame(); onClose() }}>
-            🔄 重新开始
+            <ArrowClockwise size={16} style={{ verticalAlign: -2, marginRight: 6 }} /> 重新开始
           </button>
           <button className={`${P}-quick-btn`} onClick={onClose}>
-            ▶️ 继续游戏
+            <Play size={16} weight="fill" style={{ verticalAlign: -2, marginRight: 6 }} /> 继续游戏
           </button>
         </div>
         {toast && (

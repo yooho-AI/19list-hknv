@@ -13,13 +13,17 @@ import { DashboardDrawer } from './dashboard-drawer'
 import { TabDialogue } from './tab-dialogue'
 import { TabScene } from './tab-scene'
 import { TabCharacter } from './tab-character'
+import {
+  Notebook, Scroll, MusicNotes, SpeakerSimpleSlash,
+  List, MapTrifold, ChatCircleDots, User, FloppyDisk, X,
+} from '@phosphor-icons/react'
 
 const P = 'hk'
 
-const TAB_CONFIG = [
-  { key: 'scene', icon: '🗺️', label: '场景' },
-  { key: 'dialogue', icon: '💬', label: '对话' },
-  { key: 'character', icon: '👤', label: '人物' },
+const TABS = [
+  { key: 'scene', Icon: MapTrifold, label: '场景' },
+  { key: 'dialogue', Icon: ChatCircleDots, label: '对话' },
+  { key: 'character', Icon: User, label: '人物' },
 ] as const
 
 export function AppShell({ onMenuOpen }: { onMenuOpen: () => void }) {
@@ -64,7 +68,7 @@ export function AppShell({ onMenuOpen }: { onMenuOpen: () => void }) {
       <header className={`${P}-header`}>
         <div className={`${P}-header-left`}>
           <button className={`${P}-header-btn`} onClick={toggleDashboard} title="港漂手帐">
-            📓
+            <Notebook size={18} />
           </button>
         </div>
         <div className={`${P}-header-center`}>
@@ -81,13 +85,13 @@ export function AppShell({ onMenuOpen }: { onMenuOpen: () => void }) {
             onClick={toggleBgm}
             title="BGM"
           >
-            {bgmPlaying ? '🎵' : '🔇'}
+            {bgmPlaying ? <MusicNotes size={18} /> : <SpeakerSimpleSlash size={18} />}
           </button>
           <button className={`${P}-header-btn`} onClick={onMenuOpen} title="菜单">
-            ☰
+            <List size={18} />
           </button>
           <button className={`${P}-header-btn`} onClick={toggleRecords} title="事件记录">
-            📜
+            <Scroll size={18} />
           </button>
         </div>
       </header>
@@ -142,22 +146,21 @@ export function AppShell({ onMenuOpen }: { onMenuOpen: () => void }) {
 
       {/* Tab Bar */}
       <nav className={`${P}-tab-bar`}>
-        {TAB_CONFIG.map(({ key, icon, label }) => (
+        {TABS.map(({ key, Icon, label }) => (
           <button
             key={key}
             className={`${P}-tab-item ${activeTab === key ? `${P}-tab-active` : ''}`}
             onClick={() => setActiveTab(key as typeof activeTab)}
           >
-            <span>{icon}</span>
+            <Icon size={20} weight={activeTab === key ? 'fill' : 'regular'} />
             <span>{label}</span>
           </button>
         ))}
         <button
           className={`${P}-tab-item`}
           onClick={handleSave}
-          style={{ fontSize: 10 }}
         >
-          <span>💾</span>
+          <FloppyDisk size={20} />
           <span>保存</span>
         </button>
       </nav>
@@ -185,7 +188,7 @@ export function AppShell({ onMenuOpen }: { onMenuOpen: () => void }) {
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             >
-              <button className={`${P}-record-close`} onClick={toggleRecords}>✕</button>
+              <button className={`${P}-record-close`} onClick={toggleRecords}><X size={16} /></button>
               <h3 className={`${P}-record-title`}>事件记录</h3>
               <div className={`${P}-record-timeline`}>
                 {[...storyRecords].reverse().map((record) => (
