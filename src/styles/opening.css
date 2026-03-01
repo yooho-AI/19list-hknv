@@ -297,6 +297,85 @@
   background-size: 256px;
 }
 
+/* ── Prologue: 序幕叙事 ── */
+
+.hk-prologue {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #0a0a0a;
+  z-index: 999;
+  cursor: pointer;
+  user-select: none;
+}
+
+.hk-prologue-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.hk-prologue-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(10, 10, 10, 0.3) 0%, rgba(10, 10, 10, 0.6) 100%),
+    linear-gradient(180deg, rgba(10, 10, 10, 0.4) 0%, rgba(10, 10, 10, 0.2) 40%, rgba(10, 10, 10, 0.7) 100%);
+}
+
+.hk-prologue-text {
+  position: absolute;
+  z-index: 3;
+  bottom: 20vh;
+  left: 0;
+  right: 0;
+  padding: 0 36px;
+  text-align: center;
+  font-size: 15px;
+  color: rgba(232, 168, 124, 0.85);
+  line-height: 2.2;
+  letter-spacing: 1.5px;
+}
+
+.hk-prologue-char {
+  display: inline;
+  opacity: 0;
+  animation: hkTypeIn 0.08s forwards;
+}
+
+.hk-prologue-dots {
+  position: absolute;
+  z-index: 3;
+  bottom: calc(32px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.hk-prologue-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(232, 168, 124, 0.2);
+  transition: all 0.4s;
+}
+
+.hk-prologue-dot.active {
+  background: #E8A87C;
+  box-shadow: 0 0 8px rgba(232, 168, 124, 0.5);
+  width: 18px;
+  border-radius: 3px;
+}
+
+.hk-prologue-dot.done {
+  background: rgba(232, 168, 124, 0.5);
+}
+
 /* ── Fade transitions ── */
 
 .hk-fade-in {

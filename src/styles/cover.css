@@ -1,0 +1,168 @@
+/* ================================================================
+   封面 — 香港女子图鉴：暗调港风 + 奶茶暖金（cover- 前缀，独立于游戏 UI）
+   ================================================================ */
+
+.cover {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #0a0a0a;
+}
+
+/* 背景图片全屏 + Ken Burns 慢推 */
+.cover-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  animation: coverKenBurns 20s ease-in-out infinite alternate;
+}
+
+@keyframes coverKenBurns {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.08); }
+}
+
+/* 底部渐变暗角 — 暗调港风 */
+.cover-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 10, 10, 0.2) 0%,
+    rgba(10, 10, 10, 0) 20%,
+    rgba(10, 10, 10, 0) 40%,
+    rgba(26, 21, 32, 0.4) 60%,
+    rgba(10, 10, 10, 0.75) 80%,
+    rgba(10, 10, 10, 0.92) 100%
+  );
+}
+
+/* 底部内容区 */
+.cover-content {
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 28px 48px;
+  padding-bottom: calc(48px + env(safe-area-inset-bottom));
+}
+
+/* 装饰线 — 暖金渐变 */
+.cover-line {
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(232, 168, 124, 0.7), transparent);
+  margin-bottom: 16px;
+}
+
+/* 主标题 — 暖金 + 光晕 */
+.cover-logo {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 8px;
+  color: #E8A87C;
+  text-shadow:
+    0 0 30px rgba(232, 168, 124, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.6);
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+/* 副标题 — 淡暖金 */
+.cover-sub {
+  font-size: 13px;
+  letter-spacing: 10px;
+  color: rgba(232, 168, 124, 0.6);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+/* 标语 */
+.cover-slogan {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 36px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* 按钮组 */
+.cover-actions {
+  width: 100%;
+  max-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* 开始按钮 — 暖金描边毛玻璃 */
+.cover-start {
+  width: 100%;
+  padding: 14px 0;
+  border: 1px solid rgba(232, 168, 124, 0.35);
+  border-radius: 4px;
+  background: rgba(232, 168, 124, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: #E8A87C;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.cover-start::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(232, 168, 124, 0.12), transparent);
+  animation: coverShimmer 2.5s ease-in-out infinite;
+}
+
+@keyframes coverShimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.cover-start:active {
+  transform: scale(0.97);
+  background: rgba(232, 168, 124, 0.2);
+}
+
+/* 继续按钮 — 更透明 */
+.cover-continue {
+  width: 100%;
+  padding: 13px 0;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(232, 168, 124, 0.15);
+  color: rgba(232, 168, 124, 0.5);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cover-continue:active {
+  background: rgba(232, 168, 124, 0.1);
+  color: rgba(232, 168, 124, 0.8);
+}

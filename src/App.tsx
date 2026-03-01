@@ -1,16 +1,19 @@
 /**
- * [INPUT]: store.ts, styles, analytics
- * [OUTPUT]: Root component — Opening + GameScreen + EndingModal + MenuOverlay
+ * [INPUT]: store.ts, styles, analytics, CoverPage, Prologue
+ * [OUTPUT]: Root component — Cover → Prologue → Name Input → GameScreen + EndingModal + MenuOverlay
  * [POS]: App entry point, no isMobile branching
  * [PROTOCOL]: Update this header on change, then check CLAUDE.md
  */
 
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useGameStore, ENDINGS } from './lib/store'
 import { useBgm } from './lib/bgm'
 import { trackGameStart, trackGameContinue, trackPlayerCreate } from './lib/analytics'
+import CoverPage from '@/components/opening/CoverPage'
+import Prologue from '@/components/opening/Prologue'
 import { AppShell } from './components/game/app-shell'
+import './styles/cover.css'
 import './styles/globals.css'
 import './styles/opening.css'
 import './styles/rich-cards.css'
@@ -33,29 +36,22 @@ function StartScreen() {
   const { setPlayerInfo, initGame, loadGame, hasSave } = useGameStore()
   const { toggle: toggleBgm, isPlaying } = useBgm()
   const saved = hasSave()
-  const [phase, setPhase] = useState<'cinema' | 'name'>('cinema')
+  const [phase, setPhase] = useState<'cover' | 'prologue' | 'name'>('cover')
   const [name, setName] = useState('林薇琪')
-  const [typeIndex, setTypeIndex] = useState(0)
-
-  const introText = '一只行李箱，一腔热血，一份IANG签证。\n从红磡劏房到维港之巅，\n你的图鉴，由你亲手绘制。'
-  const chars = useMemo(() => introText.split(''), [])
-
-  useEffect(() => {
-    if (phase !== 'cinema') return
-    if (typeIndex >= chars.length) return
-    const timer = setTimeout(() => setTypeIndex((i) => i + 1), 60)
-    return () => clearTimeout(timer)
-  }, [typeIndex, phase, chars.length])
 
   const handleStart = useCallback(() => {
     trackGameStart()
-    setPhase('name')
+    setPhase('prologue')
   }, [])
 
   const handleContinue = useCallback(() => {
     trackGameContinue()
     loadGame()
   }, [loadGame])
+
+  const handlePrologueComplete = useCallback(() => {
+    setPhase('name')
+  }, [])
 
   const handleBegin = useCallback(() => {
     if (!name.trim()) return
@@ -64,129 +60,66 @@ function StartScreen() {
     initGame()
   }, [name, setPlayerInfo, initGame])
 
+  // Phase 0: Cover
+  if (phase === 'cover') {
+    return (
+      <CoverPage
+        hasSave={saved}
+        onNewGame={handleStart}
+        onContinue={handleContinue}
+      />
+    )
+  }
+
+  // Phase 1: Prologue
+  if (phase === 'prologue') {
+    return <Prologue onComplete={handlePrologueComplete} />
+  }
+
+  // Phase 2: Name input
   return (
     <div className={`${P}-start`}>
       <div className={`${P}-film-grain`} />
 
       <AnimatePresence mode="wait">
-        {phase === 'cinema' && (
+        <motion.div
+          key="name"
+          className={`${P}-name-scene`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
           <motion.div
-            key="cinema"
-            className={`${P}-cinema-scene`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            style={{ width: '100%', maxWidth: 300, textAlign: 'center' }}
           >
-            {/* Skyline silhouette */}
-            <div className={`${P}-skyline`} />
+            <div className={`${P}-name-label`}>你的名字</div>
+            <input
+              className={`${P}-name-input`}
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="输入角色名"
+              maxLength={8}
+              autoFocus
+            />
+            <div className={`${P}-name-hint`}>默认：林薇琪</div>
 
-            {/* Neon dots */}
-            <div className={`${P}-neon-dots`}>
-              {Array.from({ length: 20 }).map((_, i) => (
-                <div
-                  key={i}
-                  className={`${P}-neon-dot`}
-                  style={{
-                    left: `${10 + Math.random() * 80}%`,
-                    top: `${20 + Math.random() * 60}%`,
-                    color: ['#E8A87C', '#FF6B9D', '#6B8DD6', '#22c55e', '#f59e0b'][i % 5],
-                    animationDelay: `${Math.random() * 3}s`,
-                    animationDuration: `${1.5 + Math.random() * 2}s`,
-                  }}
-                />
-              ))}
-            </div>
-
-            {/* Title */}
-            <motion.div
-              className={`${P}-cinema-title`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <div className={`${P}-title-main`}>香港女子图鉴</div>
-              <div className={`${P}-title-divider`} />
-              <div className={`${P}-title-sub`}>港漂十年</div>
-            </motion.div>
-
-            {/* Typewriter text */}
-            <motion.div
-              className={`${P}-typewriter`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.2 }}
-            >
-              {chars.slice(0, typeIndex).map((char, i) => (
-                <span
-                  key={i}
-                  className={`${P}-type-char`}
-                  style={{ animationDelay: '0s' }}
-                >
-                  {char === '\n' ? <br /> : char}
-                </span>
-              ))}
-              {typeIndex < chars.length && <span className={`${P}-type-cursor`} />}
-            </motion.div>
-
-            {/* CTA */}
-            <motion.div
-              className={`${P}-start-cta`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 2.5 }}
-            >
-              <button className={`${P}-start-btn`} onClick={handleStart}>
-                开始你的港漂十年
+            <div className={`${P}-start-cta`}>
+              <button className={`${P}-start-btn`} onClick={handleBegin}>
+                踏上旅程
               </button>
-              {saved && (
-                <button className={`${P}-continue-btn`} onClick={handleContinue}>
-                  继续游戏
-                </button>
-              )}
-            </motion.div>
+              <button
+                className={`${P}-continue-btn`}
+                onClick={() => setPhase('cover')}
+              >
+                返回
+              </button>
+            </div>
           </motion.div>
-        )}
-
-        {phase === 'name' && (
-          <motion.div
-            key="name"
-            className={`${P}-name-scene`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              style={{ width: '100%', maxWidth: 300, textAlign: 'center' }}
-            >
-              <div className={`${P}-name-label`}>你的名字</div>
-              <input
-                className={`${P}-name-input`}
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="输入角色名"
-                maxLength={8}
-                autoFocus
-              />
-              <div className={`${P}-name-hint`}>默认：林薇琪</div>
-
-              <div className={`${P}-start-cta`}>
-                <button className={`${P}-start-btn`} onClick={handleBegin}>
-                  踏上旅程
-                </button>
-                <button
-                  className={`${P}-continue-btn`}
-                  onClick={() => setPhase('cinema')}
-                >
-                  返回
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
+        </motion.div>
       </AnimatePresence>
 
       {/* Music bar */}
