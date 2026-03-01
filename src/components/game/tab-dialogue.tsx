@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore, ITEMS, SCENES, STORY_INFO } from '../../lib/store'
 import type { Message } from '../../lib/store'
 import { parseStoryParagraph } from '../../lib/parser'
-import { Backpack, PaperPlaneRight, Gift } from '@phosphor-icons/react'
+import { Backpack, PaperPlaneRight, Gift, GameController, CaretUp, CaretDown } from '@phosphor-icons/react'
 
 const P = 'hk'
 
@@ -262,6 +262,8 @@ export function TabDialogue() {
   } = useGameStore()
   const [input, setInput] = useState('')
   const [showInventory, setShowInventory] = useState(false)
+  const [choicesOpen, setChoicesOpen] = useState(false)
+  const prevChoicesRef = useRef<string[]>([])
   const chatRef = useRef<HTMLDivElement>(null)
 
   const totalItems = Object.values(inventory).reduce((sum, n) => sum + n, 0)
@@ -273,6 +275,15 @@ export function TabDialogue() {
     }
   }, [messages, streamingContent, choices])
 
+  // Auto-collapse when choices change (new AI response)
+  useEffect(() => {
+    const prev = prevChoicesRef.current
+    if (choices.length > 0 && (choices.length !== prev.length || choices[0] !== prev[0])) {
+      setChoicesOpen(false)
+    }
+    prevChoicesRef.current = choices
+  }, [choices])
+
   const handleSend = useCallback(() => {
     const text = input.trim()
     if (!text || isTyping) return
@@ -282,6 +293,7 @@ export function TabDialogue() {
 
   const handleChoice = useCallback((action: string) => {
     if (isTyping) return
+    setChoicesOpen(false)
     sendMessage(action)
   }, [isTyping, sendMessage])
 
@@ -297,20 +309,61 @@ export function TabDialogue() {
         {isTyping && !streamingContent && <TypingIndicator />}
       </div>
 
-      {/* Dynamic Choices from AI (4x1 vertical) */}
+      {/* Collapsible Choices Panel */}
       {choices.length > 0 && (
-        <div className={`${P}-choice-list`}>
-          {choices.map((action, idx) => (
-            <button
-              key={`${action}-${idx}`}
-              className={`${P}-choice-btn`}
-              onClick={() => handleChoice(action)}
-              disabled={isTyping}
-            >
-              <span className={`${P}-choice-idx`}>{idx + 1}</span>
-              {action}
-            </button>
-          ))}
+        <div className={`${P}-choice-wrap`}>
+          <AnimatePresence mode="wait">
+            {!choicesOpen ? (
+              <motion.button
+                key="collapsed"
+                className={`${P}-choice-toggle`}
+                onClick={() => setChoicesOpen(true)}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                disabled={isTyping}
+              >
+                <GameController size={16} weight="fill" />
+                <span>展开行动选项</span>
+                <span className={`${P}-choice-toggle-badge`}>{choices.length}</span>
+                <CaretUp size={14} />
+              </motion.button>
+            ) : (
+              <motion.div
+                key="expanded"
+                className={`${P}-choice-panel`}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              >
+                <button
+                  className={`${P}-choice-panel-header`}
+                  onClick={() => setChoicesOpen(false)}
+                >
+                  <span>选择行动</span>
+                  <span className={`${P}-choice-panel-count`}>{choices.length}项</span>
+                  <CaretDown size={14} />
+                </button>
+                <div className={`${P}-choice-list`}>
+                  {choices.map((action, idx) => (
+                    <motion.button
+                      key={`${action}-${idx}`}
+                      className={`${P}-choice-btn`}
+                      onClick={() => handleChoice(action)}
+                      disabled={isTyping}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                    >
+                      <span className={`${P}-choice-idx`}>{String.fromCharCode(65 + idx)}</span>
+                      {action}
+                    </motion.button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
 

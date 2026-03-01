@@ -3,10 +3,10 @@ L2 | 父级: 19list-hknv/CLAUDE.md
 
 ## 成员清单
 
-- `app-shell.tsx`: 游戏主壳——Header(📓+📜) + Tab路由(三向手势导航) + TabBar(3项+保存) + DashboardDrawer(左滑) + RecordSheet(右滑) + Toast
+- `app-shell.tsx`: 游戏主壳——Header(BGM+菜单) + Tab路由(三向手势导航) + TabBar(5项：手册/场景/对话/人物/事件) + DashboardDrawer(左滑) + RecordSheet(右滑)
 - `dashboard-drawer.tsx`: 港漂手帐——左侧滑入抽屉，6组件：扉页/缘分速览(4男主好感)/能力值(6条)/场景网格(3列)/当前目标/财务速览。Reorder拖拽排序
-- `tab-dialogue.tsx`: 对话Tab——ChatArea(LetterCard/MessageBubble(NPC头像+角色色标左边框)/StreamingBubble/SceneTransitionCard/MonthChangeCard) + QuickActions(2x2网格) + InputArea + InventorySheet
-- `tab-scene.tsx`: 场景Tab——SceneHero(9:16大图+渐变遮罩+场景信息) + 相关人物(2列) + 地点列表(2列，锁定/解锁/当前态)
+- `tab-dialogue.tsx`: 对话Tab——ChatArea(LetterCard/MessageBubble(NPC头像+角色色标左边框)/StreamingBubble/SceneTransitionCard/MonthChangeCard) + CollapsibleChoicesPanel(折叠/展开A-D卡片) + InputArea + InventorySheet
+- `tab-scene.tsx`: 场景Tab——SceneHero(9:16大图+渐变遮罩+场景信息) + 地点列表(2列，锁定/解锁/当前态)
 - `tab-character.tsx`: 人物Tab——PortraitHero(呼吸动画) + 好感度条 + 能力值条(6全局) + SVG RelationGraph + 角色网格(2列) + CharacterDossier全屏档案
 
 ## 富UI组件清单
@@ -20,7 +20,7 @@ L2 | 父级: 19list-hknv/CLAUDE.md
 
 ## 交互架构
 
-- **三向手势导航**：右滑→左侧手帐 | 左滑→右侧记录 | Header按钮同等触发
+- **三向手势导航**：右滑→左侧手帐 | 左滑→右侧记录 | TabBar手册/事件按钮同等触发
 - **手帐拖拽排序**：Reorder.Group + dragControls + 拖拽手柄(⋮⋮)，排序持久化localStorage
 - 移动优先唯一布局，无 isMobile 条件分叉
 - 所有组件通过 `useGameStore` 获取状态

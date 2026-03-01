@@ -9,8 +9,8 @@ React 19 + Zustand 5 + Immer + Vite 7 + Tailwind CSS v4 + Framer Motion + Cloudf
 ├── worker/index.js              - ☆ CF Worker API 代理（备用，未部署）
 ├── public/
 │   ├── audio/bgm.mp3            - 背景音乐
-│   ├── characters/              - 4 角色立绘 9:16 竖版 (1440x2560)
-│   └── scenes/                  - 7 场景背景 9:16 竖版 (1440x2560)
+│   ├── characters/              - 4 角色立绘 9:16 竖版 (720x1280)
+│   └── scenes/                  - 7 场景背景 9:16 竖版 (720x1280)
 ├── src/
 │   ├── main.tsx                 - ☆ React 入口
 │   ├── vite-env.d.ts            - Vite 类型声明
@@ -29,9 +29,9 @@ React 19 + Zustand 5 + Immer + Vite 7 + Tailwind CSS v4 + Framer Motion + Cloudf
 │   │   ├── opening.css          - 开场样式：港式电影片头 + 城市剪影 + 金字打字机
 │   │   └── rich-cards.css       - 富UI组件：场景卡 + 月变卡 + NPC气泡 + 抽屉 + 档案 + 关系图 + Toast
 │   └── components/game/
-│       ├── app-shell.tsx        - 居中壳 + Header + Tab路由 + TabBar + 三向手势 + DashboardDrawer + RecordSheet
+│       ├── app-shell.tsx        - 居中壳 + Header(BGM+菜单) + Tab路由 + TabBar(5项) + 三向手势 + DashboardDrawer + RecordSheet
 │       ├── dashboard-drawer.tsx - 港漂手帐(左抽屉)：扉页+缘分速览+能力值+场景网格+目标+财务。Reorder拖拽排序
-│       ├── tab-dialogue.tsx     - 对话 Tab：富消息路由(SceneCard/MonthCard/NPC头像气泡) + 快捷操作 + 背包
+│       ├── tab-dialogue.tsx     - 对话 Tab：富消息路由(SceneCard/MonthCard/NPC头像气泡) + 可折叠选项面板 + 背包
 │       ├── tab-scene.tsx        - 场景 Tab：9:16大图 + 人物标签 + 地点列表
 │       └── tab-character.tsx    - 人物 Tab：立绘 + 属性 + SVG关系图 + 角色网格 + 全屏档案
 ├── index.html

@@ -308,13 +308,86 @@ body {
   100% { left: 200%; }
 }
 
-/* ── Choice List (4x1 vertical) ── */
+/* ── Collapsible Choices Panel ── */
+
+.hk-choice-wrap {
+  padding: 0 16px 8px;
+}
+
+.hk-choice-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(var(--primary-rgb), 0.06);
+  border: 1px solid rgba(var(--primary-rgb), 0.15);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.hk-choice-toggle:active {
+  background: rgba(var(--primary-rgb), 0.12);
+  border-color: rgba(var(--primary-rgb), 0.25);
+}
+
+.hk-choice-toggle:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.hk-choice-toggle-badge {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: rgba(var(--primary-rgb), 0.15);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.hk-choice-panel {
+  background: rgba(var(--primary-rgb), 0.04);
+  border: 1px solid rgba(var(--primary-rgb), 0.12);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.hk-choice-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(var(--primary-rgb), 0.08);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hk-choice-panel-count {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
 
 .hk-choice-list {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 8px 16px;
+  padding: 8px;
 }
 
 .hk-choice-btn {
@@ -323,8 +396,8 @@ body {
   gap: 10px;
   padding: 10px 14px;
   background: rgba(var(--primary-rgb), 0.05);
-  border: 1px solid rgba(var(--primary-rgb), 0.15);
-  border-radius: 12px;
+  border: 1px solid rgba(var(--primary-rgb), 0.1);
+  border-radius: 10px;
   color: var(--text-primary);
   font-size: 13px;
   cursor: pointer;

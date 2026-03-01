@@ -5,7 +5,7 @@
  * [PROTOCOL]: Update this header on change, then check CLAUDE.md
  */
 
-import { useRef, useCallback, useState } from 'react'
+import { useRef, useCallback } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useGameStore, PERIODS, getCurrentChapter, getMonthYear } from '../../lib/store'
 import { useBgm } from '../../lib/bgm'
@@ -15,7 +15,7 @@ import { TabScene } from './tab-scene'
 import { TabCharacter } from './tab-character'
 import {
   Notebook, Scroll, MusicNotes, SpeakerSimpleSlash,
-  List, MapTrifold, ChatCircleDots, User, FloppyDisk, X,
+  List, MapTrifold, ChatCircleDots, User, X,
 } from '@phosphor-icons/react'
 
 const P = 'hk'
@@ -30,10 +30,9 @@ export function AppShell({ onMenuOpen }: { onMenuOpen: () => void }) {
   const {
     activeTab, setActiveTab, currentMonth, currentPeriodIndex, currentChapter,
     showDashboard, toggleDashboard, showRecords, toggleRecords,
-    storyRecords, saveGame,
+    storyRecords,
   } = useGameStore()
   const { toggle: toggleBgm, isPlaying: bgmPlaying } = useBgm()
-  const [toast, setToast] = useState('')
 
   // Three-way gesture
   const touchStart = useRef<{ x: number; y: number } | null>(null)
@@ -56,19 +55,17 @@ export function AppShell({ onMenuOpen }: { onMenuOpen: () => void }) {
   const chapter = getCurrentChapter(currentMonth)
   const { year, monthInYear } = getMonthYear(currentMonth)
 
-  const handleSave = useCallback(() => {
-    saveGame()
-    setToast('已保存')
-    setTimeout(() => setToast(''), 2000)
-  }, [saveGame])
-
   return (
     <div className={`${P}-shell`}>
       {/* Header */}
       <header className={`${P}-header`}>
         <div className={`${P}-header-left`}>
-          <button className={`${P}-header-btn`} onClick={toggleDashboard} title="港漂手帐">
-            <Notebook size={18} />
+          <button
+            className={`${P}-header-btn ${bgmPlaying ? `${P}-music-playing` : ''}`}
+            onClick={toggleBgm}
+            title="BGM"
+          >
+            {bgmPlaying ? <MusicNotes size={18} /> : <SpeakerSimpleSlash size={18} />}
           </button>
         </div>
         <div className={`${P}-header-center`}>
@@ -80,18 +77,8 @@ export function AppShell({ onMenuOpen }: { onMenuOpen: () => void }) {
           </div>
         </div>
         <div className={`${P}-header-right`}>
-          <button
-            className={`${P}-header-btn ${bgmPlaying ? `${P}-music-playing` : ''}`}
-            onClick={toggleBgm}
-            title="BGM"
-          >
-            {bgmPlaying ? <MusicNotes size={18} /> : <SpeakerSimpleSlash size={18} />}
-          </button>
           <button className={`${P}-header-btn`} onClick={onMenuOpen} title="菜单">
             <List size={18} />
-          </button>
-          <button className={`${P}-header-btn`} onClick={toggleRecords} title="事件记录">
-            <Scroll size={18} />
           </button>
         </div>
       </header>
@@ -144,8 +131,12 @@ export function AppShell({ onMenuOpen }: { onMenuOpen: () => void }) {
         </AnimatePresence>
       </div>
 
-      {/* Tab Bar */}
+      {/* Tab Bar (5 buttons: 手册 + 场景/对话/人物 + 事件) */}
       <nav className={`${P}-tab-bar`}>
+        <button className={`${P}-tab-item`} onClick={toggleDashboard}>
+          <Notebook size={20} weight={showDashboard ? 'fill' : 'regular'} />
+          <span>手册</span>
+        </button>
         {TABS.map(({ key, Icon, label }) => (
           <button
             key={key}
@@ -156,12 +147,9 @@ export function AppShell({ onMenuOpen }: { onMenuOpen: () => void }) {
             <span>{label}</span>
           </button>
         ))}
-        <button
-          className={`${P}-tab-item`}
-          onClick={handleSave}
-        >
-          <FloppyDisk size={20} />
-          <span>保存</span>
+        <button className={`${P}-tab-item`} onClick={toggleRecords}>
+          <Scroll size={20} weight={showRecords ? 'fill' : 'regular'} />
+          <span>事件</span>
         </button>
       </nav>
 
@@ -214,19 +202,6 @@ export function AppShell({ onMenuOpen }: { onMenuOpen: () => void }) {
         )}
       </AnimatePresence>
 
-      {/* Toast */}
-      <AnimatePresence>
-        {toast && (
-          <motion.div
-            className={`${P}-toast`}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-          >
-            {toast}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }
