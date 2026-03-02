@@ -12,7 +12,7 @@ export const PROLOGUE_SCENES = [
   },
   {
     image: '/scenes/apartment.jpg',
-    text: '红磡的劏房只有200呎，\n但窗外的霓虹灯让你相信——\n这座城市装得下所有野心与梦想。',
+    text: '红磡的劏房只有100呎，\n但窗外的霓虹灯让你相信——\n这座城市装得下所有野心与梦想。',
   },
   {
     image: '/scenes/central.jpg',

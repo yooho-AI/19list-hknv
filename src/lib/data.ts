@@ -245,7 +245,7 @@ export const SCENES: Record<string, Scene> = {
     id: 'apartment',
     name: '红磡劏房',
     icon: '🏠',
-    description: '200呎的起点，窗缝里能看到一小片维港',
+    description: '100呎的起点，窗缝里能看到一小片维港',
     background: '/scenes/apartment.jpg',
     atmosphere: '狭小但温暖的港漂起点',
     tags: ['住所', '私密', '日常'],
