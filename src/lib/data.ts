@@ -211,7 +211,7 @@ const LI_ZHIXUAN: Character = {
 const CHENG_ZHIFENG: Character = {
   id: 'chengzhifeng',
   name: '程志峰',
-  portrait: '/characters/chengzhifeng.jpg?v=2',
+  portrait: '/characters/chengzhifeng.jpg?v=3',
   gender: 'male',
   age: 35,
   title: '电视台副台长',
