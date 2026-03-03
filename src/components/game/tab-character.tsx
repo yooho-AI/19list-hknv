@@ -1,38 +1,18 @@
 /**
- * [INPUT]: store.ts (characters/currentCharacter/selectCharacter/characterStats/globalStats/currentMonth)
- * [OUTPUT]: TabCharacter — portrait hero + stat bars + relation graph + character grid + dossier
- * [POS]: 人物 Tab，立绘 + 属性 + SVG关系图 + 角色网格 + 全屏档案卡
+ * [INPUT]: store.ts (characters/currentCharacter/selectCharacter/characterStats/currentMonth)
+ * [OUTPUT]: TabCharacter — 2x2 grid + SVG relation graph + CharacterDossier + CharacterChat
+ * [POS]: 人物 Tab，2x2角色网格(聊天按钮+mini好感条) + SVG关系图 + 全屏档案 + 私聊
  * [PROTOCOL]: Update this header on change, then check CLAUDE.md
  */
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChatCircleDots } from '@phosphor-icons/react'
-import { useGameStore, GLOBAL_STAT_METAS, getAvailableCharacters } from '../../lib/store'
-import type { StatMeta, Character } from '../../lib/store'
+import { useGameStore, getAvailableCharacters, getStatLevel } from '../../lib/store'
+import type { Character } from '../../lib/store'
 import CharacterChat from './character-chat'
 
 const P = 'hk'
-
-// ── StatBar ───────────────────────────────────────────
-
-function StatBar({ meta, value, delay = 0 }: { meta: StatMeta; value: number; delay?: number }) {
-  return (
-    <div className={`${P}-stat-bar`}>
-      <span className={`${P}-stat-bar-label`}>{meta.icon} {meta.label}</span>
-      <div className={`${P}-stat-bar-track`}>
-        <motion.div
-          className={`${P}-stat-bar-fill`}
-          style={{ background: meta.color }}
-          initial={{ width: 0 }}
-          animate={{ width: `${value}%` }}
-          transition={{ duration: 0.6, ease: 'easeOut', delay }}
-        />
-      </div>
-      <span className={`${P}-stat-bar-value`} style={{ color: meta.color }}>{value}</span>
-    </div>
-  )
-}
 
 // ── Relation Label ────────────────────────────────────
 
@@ -65,7 +45,7 @@ function RelationGraph({ onNodeClick }: { onNodeClick: (id: string) => void }) {
   })
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', marginBottom: 16 }}>
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto' }}>
       {/* Lines */}
       {nodes.map((node) => {
         const stats = characterStats[node.id] ?? {}
@@ -115,7 +95,16 @@ function RelationGraph({ onNodeClick }: { onNodeClick: (id: string) => void }) {
               stroke={isSelected ? node.char.themeColor : 'var(--border)'}
               strokeWidth={isSelected ? 1.5 : 1}
             />
-            <text x={node.x} y={node.y + 1} textAnchor="middle" dominantBaseline="middle" fontSize={16}>👤</text>
+            <clipPath id={`clip-${node.id}`}>
+              <circle cx={node.x} cy={node.y} r={NODE_R - 2} />
+            </clipPath>
+            <image
+              href={node.char.portrait}
+              x={node.x - NODE_R + 2} y={node.y - NODE_R + 2}
+              width={(NODE_R - 2) * 2} height={(NODE_R - 2) * 2}
+              clipPath={`url(#clip-${node.id})`}
+              preserveAspectRatio="xMidYMid slice"
+            />
             <text
               x={node.x} y={node.y + NODE_R + 13}
               textAnchor="middle" fontSize={10} fontWeight={600}
@@ -130,7 +119,7 @@ function RelationGraph({ onNodeClick }: { onNodeClick: (id: string) => void }) {
   )
 }
 
-// ── CharacterDossier ──────────────────────────────────
+// ── CharacterDossier (overlay + sheet pattern) ────────
 
 function CharacterDossier({ char, stats, onClose }: {
   char: Character
@@ -141,91 +130,117 @@ function CharacterDossier({ char, stats, onClose }: {
   const rel = getRelationLabel(char, stats)
 
   return (
-    <motion.div
-      className={`${P}-dossier-overlay`}
-      initial={{ x: '100%' }}
-      animate={{ x: 0 }}
-      exit={{ x: '100%' }}
-      transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-    >
-      <button className={`${P}-dossier-close`} onClick={onClose}>✕</button>
+    <>
+      <motion.div
+        className={`${P}-dossier-overlay`}
+        style={{ background: 'rgba(0,0,0,0.5)', overflow: 'visible' }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+      />
+      <motion.div
+        className={`${P}-record-sheet`}
+        style={{ zIndex: 52, overflowY: 'auto' }}
+        initial={{ x: '100%' }}
+        animate={{ x: 0 }}
+        exit={{ x: '100%' }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+      >
+        <button className={`${P}-dossier-close`} onClick={onClose}>✕</button>
 
-      {/* Portrait */}
-      <div className={`${P}-dossier-portrait`}>
-        <motion.img
-          src={char.portrait} alt={char.name}
-          animate={{ scale: [1, 1.02, 1] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <div className={`${P}-dossier-portrait-fade`} />
-      </div>
-
-      {/* Info */}
-      <div className={`${P}-dossier-info`}>
-        <div className={`${P}-dossier-name`}>{char.name}</div>
-        <div className={`${P}-dossier-title-text`}>{char.title}</div>
-
-        {/* Tags */}
-        <div className={`${P}-dossier-tags`}>
-          <span className={`${P}-dossier-tag`}>{char.gender === 'female' ? '女' : '男'}</span>
-          <span className={`${P}-dossier-tag`}>{char.age}岁</span>
-          <span className={`${P}-dossier-tag`}>{char.title}</span>
+        {/* Portrait */}
+        <div className={`${P}-dossier-portrait`}>
+          <motion.img
+            src={char.portrait} alt={char.name}
+            animate={{ scale: [1, 1.02, 1] }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <div className={`${P}-dossier-portrait-fade`} />
         </div>
 
-        {/* Stat bars */}
-        <div className={`${P}-dossier-section`}>
-          <div className={`${P}-dossier-section-title`}>数值</div>
-          {char.statMetas.map((meta, i) => (
-            <StatBar key={meta.key} meta={meta} value={stats[meta.key] ?? 0} delay={i * 0.1} />
-          ))}
-        </div>
+        {/* Info */}
+        <div className={`${P}-dossier-info`}>
+          <div className={`${P}-dossier-name`}>{char.name}</div>
+          <div className={`${P}-dossier-title-text`}>{char.title}</div>
 
-        {/* Description */}
-        <div className={`${P}-dossier-section`}>
-          <div className={`${P}-dossier-section-title`}>简介</div>
-          <div className={`${P}-dossier-text`}>{char.description}</div>
-        </div>
-
-        {/* Personality */}
-        <div className={`${P}-dossier-section`}>
-          <div className={`${P}-dossier-section-title`}>性格</div>
-          <div className={`${P}-dossier-text`}>
-            {expanded ? char.personality : char.personality.slice(0, 40)}
-            {char.personality.length > 40 && (
-              <button
-                onClick={() => setExpanded(!expanded)}
-                style={{
-                  border: 'none', background: 'none', color: 'var(--primary)',
-                  fontSize: 12, cursor: 'pointer', padding: '0 4px',
-                }}
-              >
-                {expanded ? '收起' : '...展开'}
-              </button>
-            )}
+          {/* Tags */}
+          <div className={`${P}-dossier-tags`}>
+            <span className={`${P}-dossier-tag`}>{char.gender === 'female' ? '女' : '男'}</span>
+            <span className={`${P}-dossier-tag`}>{char.age}岁</span>
+            <span className={`${P}-dossier-tag`}>{char.title}</span>
           </div>
-          <div className={`${P}-dossier-text`} style={{ fontStyle: 'italic', color: 'var(--text-muted)', marginTop: 6 }}>
-            「{char.speakingStyle}」
-          </div>
-        </div>
 
-        {/* Relation */}
-        <div className={`${P}-dossier-section`}>
-          <div className={`${P}-dossier-section-title`}>关系</div>
-          <div style={{ color: rel.color, fontWeight: 600, fontSize: 13 }}>{rel.text}</div>
-          <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {char.triggerPoints.map((tp, i) => (
-              <span
-                key={i}
-                className={`${P}-dossier-tag`}
-                style={{ fontSize: 10 }}
-              >
-                {tp.slice(0, 6)}{'···'}
-              </span>
-            ))}
+          {/* Stat bars */}
+          <div className={`${P}-dossier-section`}>
+            <div className={`${P}-dossier-section-title`}>数值</div>
+            {char.statMetas.map((meta, i) => {
+              const value = stats[meta.key] ?? 0
+              return (
+                <div key={meta.key} className={`${P}-stat-bar`}>
+                  <span className={`${P}-stat-bar-label`}>{meta.icon} {meta.label}</span>
+                  <div className={`${P}-stat-bar-track`}>
+                    <motion.div
+                      className={`${P}-stat-bar-fill`}
+                      style={{ background: meta.color }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${value}%` }}
+                      transition={{ duration: 0.6, ease: 'easeOut', delay: i * 0.1 }}
+                    />
+                  </div>
+                  <span className={`${P}-stat-bar-value`} style={{ color: meta.color }}>{value}</span>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Description */}
+          <div className={`${P}-dossier-section`}>
+            <div className={`${P}-dossier-section-title`}>简介</div>
+            <div className={`${P}-dossier-text`}>{char.description}</div>
+          </div>
+
+          {/* Personality */}
+          <div className={`${P}-dossier-section`}>
+            <div className={`${P}-dossier-section-title`}>性格</div>
+            <div className={`${P}-dossier-text`}>
+              {expanded ? char.personality : char.personality.slice(0, 40)}
+              {char.personality.length > 40 && (
+                <button
+                  onClick={() => setExpanded(!expanded)}
+                  style={{
+                    border: 'none', background: 'none', color: 'var(--primary)',
+                    fontSize: 12, cursor: 'pointer', padding: '0 4px',
+                  }}
+                >
+                  {expanded ? '收起' : '...展开'}
+                </button>
+              )}
+            </div>
+            <div className={`${P}-dossier-text`} style={{ fontStyle: 'italic', color: 'var(--text-muted)', marginTop: 6 }}>
+              「{char.speakingStyle}」
+            </div>
+          </div>
+
+          {/* Relation */}
+          <div className={`${P}-dossier-section`}>
+            <div className={`${P}-dossier-section-title`}>关系</div>
+            <div style={{ color: rel.color, fontWeight: 600, fontSize: 13 }}>{rel.text}</div>
+            <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {char.triggerPoints.map((tp, i) => (
+                <span
+                  key={i}
+                  className={`${P}-dossier-tag`}
+                  style={{ fontSize: 10 }}
+                >
+                  {tp.slice(0, 6)}{'···'}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </>
   )
 }
 
@@ -233,118 +248,100 @@ function CharacterDossier({ char, stats, onClose }: {
 
 export function TabCharacter() {
   const {
-    characters, currentCharacter, selectCharacter,
-    characterStats, globalStats, currentMonth,
+    characters, characterStats, currentMonth,
   } = useGameStore()
   const [dossierCharId, setDossierCharId] = useState<string | null>(null)
   const [chatChar, setChatChar] = useState<string | null>(null)
 
   const available = getAvailableCharacters(currentMonth, characters)
-  const char = currentCharacter ? characters[currentCharacter] : null
-  const stats = currentCharacter ? (characterStats[currentCharacter] ?? {}) : {}
 
   const dossierChar = dossierCharId ? characters[dossierCharId] : null
   const dossierStats = dossierCharId ? (characterStats[dossierCharId] ?? {}) : {}
 
-  const handleCharClick = (id: string) => {
-    selectCharacter(id)
-    setDossierCharId(id)
-  }
-
   return (
-    <div style={{ height: '100%', overflowY: 'auto' }} className={`${P}-scrollbar`}>
-
-      {/* Portrait Hero */}
-      {char ? (
-        <>
-          <div className={`${P}-portrait-hero`}>
-            <motion.img
-              src={char.portrait} alt={char.name}
-              animate={{ scale: [1, 1.02, 1] }}
-              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-              loading="lazy"
-            />
-            <div className={`${P}-portrait-hero-mask`} />
-            <div className={`${P}-portrait-hero-info`}>
-              <h2 className={`${P}-portrait-hero-name`} style={{ color: char.themeColor }}>{char.name}</h2>
-              <p className={`${P}-portrait-hero-title`}>{char.title}</p>
-            </div>
-          </div>
-
-          {/* Character Stats */}
-          <div style={{ padding: '0 12px' }}>
-            <div className={`${P}-section-title`}>好感度</div>
-            {char.statMetas.map((meta, i) => (
-              <StatBar key={meta.key} meta={meta} value={stats[meta.key] ?? 0} delay={i * 0.1} />
-            ))}
-          </div>
-        </>
-      ) : (
-        <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>👤</div>
-          <p>选择一个角色开始互动</p>
-        </div>
-      )}
-
-      <div style={{ padding: '0 12px 20px' }}>
-        {/* Global Stats */}
-        <div className={`${P}-section-title`}>能力值</div>
-        {GLOBAL_STAT_METAS.map((meta, i) => (
-          <StatBar key={meta.key} meta={meta} value={globalStats[meta.key] ?? 0} delay={i * 0.1} />
-        ))}
-
-        {/* Relation Graph */}
-        <div className={`${P}-section-title`} style={{ marginTop: 16 }}>🔗 人物关系</div>
-        <div style={{ background: 'rgba(232,168,124,0.03)', borderRadius: 12, padding: 8, border: '1px solid var(--border)' }}>
-          <RelationGraph onNodeClick={handleCharClick} />
-        </div>
-
-        {/* All Characters Grid */}
-        <div className={`${P}-section-title`} style={{ marginTop: 16 }}>👥 所有人物</div>
-        <div className={`${P}-char-grid`}>
-          {Object.entries(available).map(([id, c]) => {
-            const isActive = id === currentCharacter
-            const charStats = characterStats[id] ?? {}
-            const affection = charStats.affection ?? 0
-            return (
+    <div style={{ height: '100%', overflowY: 'auto', padding: 12 }} className={`${P}-scrollbar`}>
+      {/* ── 角色网格 (2x2) ── */}
+      <h4 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8, paddingLeft: 4 }}>
+        👥 人物一览
+      </h4>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 20 }}>
+        {Object.entries(available).map(([id, char]) => {
+          const stats = characterStats[id] ?? {}
+          const mainMeta = char.statMetas[0]
+          const mainVal = stats[mainMeta?.key] ?? 0
+          const level = getStatLevel(mainVal)
+          return (
+            <button
+              key={id}
+              onClick={() => setDossierCharId(id)}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                padding: 10, borderRadius: 12,
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border)',
+                cursor: 'pointer', transition: 'all 0.2s',
+                position: 'relative',
+              }}
+            >
+              {/* 聊天按钮 */}
               <div
-                key={id}
-                className={`${P}-char-grid-item ${isActive ? `${P}-char-grid-active` : ''}`}
-                style={{ position: 'relative' }}
-                onClick={() => handleCharClick(id)}
+                onClick={(e) => { e.stopPropagation(); setChatChar(id) }}
+                style={{
+                  position: 'absolute', top: 6, left: 6,
+                  width: 28, height: 28, borderRadius: '50%',
+                  background: `${char.themeColor}18`,
+                  border: `1px solid ${char.themeColor}30`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer', zIndex: 1,
+                }}
               >
-                <button
-                  className={`${P}-icon-btn`}
-                  style={{
-                    position: 'absolute',
-                    top: 6,
-                    left: 6,
-                    width: 28,
-                    height: 28,
-                    zIndex: 2,
-                    background: 'rgba(0,0,0,0.5)',
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setChatChar(id)
-                  }}
-                >
-                  <ChatCircleDots size={16} weight="fill" />
-                </button>
-                <img src={c.portrait} alt={c.name} loading="lazy" />
-                <div className={`${P}-char-grid-info`}>
-                  <div className={`${P}-char-grid-name`}>{c.name}</div>
-                  <div className={`${P}-char-grid-stat`} style={{ color: c.themeColor }}>
-                    ♥ {affection}
-                  </div>
-                </div>
+                <ChatCircleDots size={16} weight="fill" color={char.themeColor} />
               </div>
-            )
-          })}
-        </div>
+              <img
+                src={char.portrait}
+                alt={char.name}
+                style={{
+                  width: 56, height: 56, borderRadius: '50%',
+                  objectFit: 'cover', objectPosition: 'center top',
+                  border: `2px solid ${char.themeColor}44`,
+                  marginBottom: 6,
+                }}
+              />
+              <span style={{ fontSize: 12, fontWeight: 500, color: char.themeColor }}>
+                {char.name}
+              </span>
+              <span style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 4 }}>
+                {char.title}
+              </span>
+              {/* Mini affection bar */}
+              <div style={{ width: '80%', height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.06)' }}>
+                <div style={{
+                  height: '100%', borderRadius: 2, background: char.themeColor,
+                  width: `${mainVal}%`, transition: 'width 0.5s ease',
+                }} />
+              </div>
+              <span style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 2 }}>
+                {level.name} {mainVal}
+              </span>
+            </button>
+          )
+        })}
       </div>
 
-      {/* CharacterDossier Overlay */}
+      {/* ── 关系图 ── */}
+      <h4 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8, paddingLeft: 4 }}>
+        🔗 关系网络
+      </h4>
+      <div style={{
+        padding: 8, borderRadius: 12, background: 'rgba(232,168,124,0.03)',
+        border: '1px solid var(--border)', marginBottom: 20,
+      }}>
+        <RelationGraph onNodeClick={(id) => setDossierCharId(id)} />
+      </div>
+
+      <div style={{ height: 16 }} />
+
+      {/* ── Character Dossier ── */}
       <AnimatePresence>
         {dossierChar && (
           <CharacterDossier
@@ -355,7 +352,7 @@ export function TabCharacter() {
         )}
       </AnimatePresence>
 
-      {/* Character Chat */}
+      {/* ── Character Chat ── */}
       <AnimatePresence>
         {chatChar && characters[chatChar] && (
           <CharacterChat
