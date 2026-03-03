@@ -731,6 +731,7 @@
   font-size: 13px;
   line-height: 2;
   color: var(--text-secondary);
+  flex-shrink: 0;
 }
 
 .hk-letter-card-title {

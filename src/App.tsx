@@ -34,7 +34,7 @@ const ENDING_TYPE_MAP: Record<string, { label: string; color: string; icon: stri
 // ── Opening Screen ──
 
 function StartScreen() {
-  const { setPlayerInfo, initGame, loadGame, hasSave } = useGameStore()
+  const { setPlayerInfo, initGame, loadGame, hasSave, sendMessage } = useGameStore()
   const { toggle: toggleBgm, isPlaying } = useBgm()
   const saved = hasSave()
   const [phase, setPhase] = useState<'cover' | 'prologue' | 'name'>('cover')
@@ -59,7 +59,9 @@ function StartScreen() {
     trackPlayerCreate(name)
     setPlayerInfo(name)
     initGame()
-  }, [name, setPlayerInfo, initGame])
+    // 自动发送第一条消息触发 AI 开场
+    setTimeout(() => sendMessage('开始游戏'), 500)
+  }, [name, setPlayerInfo, initGame, sendMessage])
 
   // Phase 0: Cover
   if (phase === 'cover') {

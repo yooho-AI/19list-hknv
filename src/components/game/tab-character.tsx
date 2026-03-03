@@ -7,8 +7,10 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { ChatCircleDots } from '@phosphor-icons/react'
 import { useGameStore, GLOBAL_STAT_METAS, getAvailableCharacters } from '../../lib/store'
 import type { StatMeta, Character } from '../../lib/store'
+import CharacterChat from './character-chat'
 
 const P = 'hk'
 
@@ -235,6 +237,7 @@ export function TabCharacter() {
     characterStats, globalStats, currentMonth,
   } = useGameStore()
   const [dossierCharId, setDossierCharId] = useState<string | null>(null)
+  const [chatChar, setChatChar] = useState<string | null>(null)
 
   const available = getAvailableCharacters(currentMonth, characters)
   const char = currentCharacter ? characters[currentCharacter] : null
@@ -307,8 +310,27 @@ export function TabCharacter() {
               <div
                 key={id}
                 className={`${P}-char-grid-item ${isActive ? `${P}-char-grid-active` : ''}`}
+                style={{ position: 'relative' }}
                 onClick={() => handleCharClick(id)}
               >
+                <button
+                  className={`${P}-icon-btn`}
+                  style={{
+                    position: 'absolute',
+                    top: 6,
+                    left: 6,
+                    width: 28,
+                    height: 28,
+                    zIndex: 2,
+                    background: 'rgba(0,0,0,0.5)',
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setChatChar(id)
+                  }}
+                >
+                  <ChatCircleDots size={16} weight="fill" />
+                </button>
                 <img src={c.portrait} alt={c.name} loading="lazy" />
                 <div className={`${P}-char-grid-info`}>
                   <div className={`${P}-char-grid-name`}>{c.name}</div>
@@ -329,6 +351,16 @@ export function TabCharacter() {
             char={dossierChar}
             stats={dossierStats}
             onClose={() => setDossierCharId(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Character Chat */}
+      <AnimatePresence>
+        {chatChar && characters[chatChar] && (
+          <CharacterChat
+            charId={chatChar}
+            onClose={() => setChatChar(null)}
           />
         )}
       </AnimatePresence>
