@@ -141,7 +141,7 @@ function CharacterDossier({ char, stats, onClose }: {
       />
       <motion.div
         className={`${P}-record-sheet`}
-        style={{ zIndex: 52, overflowY: 'auto' }}
+        style={{ zIndex: 130, overflowY: 'auto' }}
         initial={{ x: '100%' }}
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
